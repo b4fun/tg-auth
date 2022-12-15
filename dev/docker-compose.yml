@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  envoy:
+    build:
+      context: .
+      dockerfile: envoy.Dockerfile
+    volumes:
+      - ./envoy.yaml:/etc/envoy.yaml
+    networks:
+      - mesh
+    ports:
+      - 8080:8080
+      - 8081:8081
+
+  upstream-service:
+    image: httpd:2.4
+    networks:
+      - mesh
+    ports:
+      - 18080:80
+
+networks:
+  mesh: {}
