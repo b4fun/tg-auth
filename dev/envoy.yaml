@@ -18,8 +18,10 @@ static_resources:
           "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
           codec_type: auto
           stat_prefix: ingress_http
+          use_remote_address: true
+          skip_xff_append: true
           route_config:
-            name: upstream_route
+            name: local_route
             virtual_hosts:
             - name: upstream
               domains: ["*"]
@@ -27,20 +29,52 @@ static_resources:
               - match:
                   prefix: "/"
                 route:
-                  # cluster: upstream-service
-                  host_rewrite_literal: en3or27r551h.x.pipedream.net
-                  cluster: debug-service
+                  cluster: upstream-service
+                  # host_rewrite_literal: en12u9gm69ytf.x.pipedream.net
+                  # cluster: debug-service
           http_filters:
           - name: envoy.filters.http.ext_authz
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
               http_service:
                 server_uri:
-                  uri: en3or27r551h.x.pipedream.net
-                  cluster: debug-service
-                  timeout: 10s
-              status_on_error:
-                code: Unauthorized
+                  uri: auth-service:8082
+                  cluster: auth-service
+                  timeout: 1s
+                path_prefix: /test
+                authorization_request:
+                  allowed_headers:
+                    patterns:
+                    - exact: accept
+                    - exact: cookie
+                    - exact: proxy-authorization
+                    - exact: foo
+                  headers_to_add:
+                  - key: X-Upstream-Cluter
+                    value: '%UPSTREAM_CLUSTER%'
+                  - key: X-Forwarded-Method
+                    value: '%REQ(:METHOD)%'
+                  - key: X-Forwarded-Proto
+                    value: '%REQ(:SCHEME)%'
+                  - key: X-Forwarded-Host
+                    value: '%REQ(:AUTHORITY)%'
+                  - key: X-Forwarded-Uri
+                    value: '%REQ(:PATH)%'
+                  - key: X-Forwarded-For
+                    value: '%DOWNSTREAM_REMOTE_ADDRESS_WITHOUT_PORT%'
+                authorization_response:
+                  allowed_upstream_headers:
+                    patterns:
+                    - exact: authorization
+                    - exact: proxy-authorization
+                  allowed_client_headers:
+                    patterns:
+                    - exact: Set-Cookie
+                      ignore_case: true
+                  allowed_client_headers_on_success:
+                    patterns:
+                    - exact: Set-Cookie
+                      ignore_case: true
           - name: envoy.filters.http.router
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -78,13 +112,13 @@ static_resources:
         - endpoint:
             address:
               socket_address:
-                address: en3or27r551h.x.pipedream.net
+                address: en12u9gm69ytf.x.pipedream.net
                 port_value: 443
     transport_socket:
       name: envoy.transport_sockets.tls
       typed_config:
         "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-        sni: en3or27r551h.x.pipedream.net
+        sni: en12u9gm69ytf.x.pipedream.net
         common_tls_context:
           validation_context:
             match_subject_alt_names:
@@ -103,4 +137,18 @@ static_resources:
             address:
               socket_address:
                 address: upstream-service
-                port_value: 80
+                port_value: 8082
+
+  - name: auth-service
+    connect_timeout: 0.25s
+    type: strict_dns
+    lb_policy: round_robin
+    load_assignment:
+      cluster_name: auth-service
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: upstream-service
+                port_value: 8082
