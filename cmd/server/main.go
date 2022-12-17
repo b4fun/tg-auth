@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
-	"time"
+
+	tgauth "github.com/b4fun/tg-auth"
+	"go.uber.org/zap"
 )
 
 func dumpReqest(req *http.Request) {
@@ -17,29 +19,37 @@ func dumpReqest(req *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		dumpReqest(r)
+	logger, err := zap.NewProduction()
+	if err != nil {
+		panic(err)
+	}
 
-		fmt.Println("incoming request - root")
+	settings, err := tgauth.LoadEnvSettings()
+	if err != nil {
+		logger.Fatal("load settings", zap.Error(err))
+		return
+	}
 
-		w.Write([]byte("hello, world"))
-	})
+	admissioner, err := tgauth.NewTelegramChannelAdmissioner(
+		logger, settings.Bot, settings.Authz,
+	)
+	if err != nil {
+		logger.Fatal("create admissioner", zap.Error(err))
+		return
+	}
 
-	http.HandleFunc("/test/", func(w http.ResponseWriter, r *http.Request) {
-		dumpReqest(r)
+	httpServer, err := tgauth.NewDefaultHTTPServer(
+		logger, settings, admissioner,
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			dumpReqest(r)
 
-		if r.Header.Get("foo") != "" {
-			http.Redirect(w, r, "https://google.com", 302)
-			return
-		}
+			w.WriteHeader(http.StatusOK)
+		}),
+	)
+	if err != nil {
+		logger.Fatal("create http server", zap.Error(err))
+		return
+	}
 
-		fmt.Println("incoming request")
-
-		cookie := &http.Cookie{Name: "foo", Value: "bar", Expires: time.Now().Add(time.Hour)}
-		fmt.Println("cookie to write", cookie.String())
-		http.SetCookie(w, cookie)
-		w.Write([]byte("hello, world"))
-	})
-
-	http.ListenAndServe(":8082", nil)
+	http.ListenAndServe(":8082", httpServer)
 }
