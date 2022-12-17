@@ -3,6 +3,7 @@ package httpserver
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -70,8 +71,8 @@ func (ss *signinServer) validateSignin(req *http.Request) (session.Session, erro
 	if _, err := mac.Write([]byte(checkStr)); err != nil {
 		return sess, fmt.Errorf("calculate HMAC SHA256: %w", err)
 	}
-	expectedHash := mac.Sum(nil)
-	if !hmac.Equal(expectedHash, []byte(hash)) {
+	expectedHash := hex.EncodeToString(mac.Sum(nil))
+	if !hmac.Equal([]byte(expectedHash), []byte(hash)) {
 		return sess, errors.New("HMAC SHA256 hash mismatch")
 	}
 
