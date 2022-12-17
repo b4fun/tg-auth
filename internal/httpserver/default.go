@@ -45,9 +45,9 @@ func Default(
 	}
 
 	mux := http.NewServeMux()
+	mux.Handle("/", requireAuth(defaultHandler))
 	mux.Handle("/signin", signinFrontend)
 	mux.Handle("/signin/callback", signinCallback)
-	mux.Handle("/", requireAuth(defaultHandler))
 
 	return mux, nil
 }

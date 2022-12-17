@@ -193,6 +193,7 @@ func (sm *cookieSessionManager) SetSession(
 		Expires: sessionExpireAt,
 		Secure:  true, // https only
 		Domain:  sm.cookieDomain,
+		Path:    "/", // allow in all paths under this domain
 	}
 
 	http.SetCookie(rw, cookie)
