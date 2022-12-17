@@ -18,6 +18,8 @@ services:
     - bash
     - -c
     - 'go run ./cmd/server/*.go'
+    env_file:
+    - .env.local
     volumes:
       - ..:/workspace
     networks:

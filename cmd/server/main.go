@@ -6,6 +6,7 @@ import (
 	"net/http/httputil"
 
 	tgauth "github.com/b4fun/tg-auth"
+	_ "github.com/joho/godotenv/autoload"
 	"go.uber.org/zap"
 )
 
