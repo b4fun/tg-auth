@@ -52,5 +52,8 @@ func main() {
 		return
 	}
 
-	http.ListenAndServe(":8082", httpServer)
+	if err := http.ListenAndServe(":8082", httpServer); err != nil {
+		logger.Fatal("http server serve", zap.Error(err))
+		return
+	}
 }
