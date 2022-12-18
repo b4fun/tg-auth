@@ -12,6 +12,11 @@ services:
       - 8081:8081
 
   upstream-service:
+    image: httpd:2.4.54
+    networks:
+      - mesh
+
+  auth-service:
     image: golang:1.19
     working_dir: /workspace
     command:

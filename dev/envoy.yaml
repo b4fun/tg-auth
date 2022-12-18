@@ -27,11 +27,17 @@ static_resources:
               domains: ["*"]
               routes:
               - match:
+                  prefix: "/signin"
+                route:
+                  cluster: auth-service
+                typed_per_filter_config:
+                  envoy.filters.http.ext_authz:
+                    "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthzPerRoute
+                    disabled: true
+              - match:
                   prefix: "/"
                 route:
                   cluster: upstream-service
-                  # host_rewrite_literal: en12u9gm69ytf.x.pipedream.net
-                  # cluster: debug-service
           http_filters:
           - name: envoy.filters.http.ext_authz
             typed_config:
@@ -41,14 +47,12 @@ static_resources:
                   uri: auth-service:8082
                   cluster: auth-service
                   timeout: 1s
-                path_prefix: /test
                 authorization_request:
                   allowed_headers:
                     patterns:
                     - exact: accept
                     - exact: cookie
                     - exact: proxy-authorization
-                    - exact: foo
                   headers_to_add:
                   - key: X-Upstream-Cluter
                     value: '%UPSTREAM_CLUSTER%'
@@ -101,30 +105,6 @@ static_resources:
                 bytes_sent: "%BYTES_SENT%"
 
   clusters:
-  - name: debug-service
-    connect_timeout: 1s
-    type: logical_dns
-    lb_policy: round_robin
-    load_assignment:
-      cluster_name: debug-service
-      endpoints:
-      - lb_endpoints:
-        - endpoint:
-            address:
-              socket_address:
-                address: en12u9gm69ytf.x.pipedream.net
-                port_value: 443
-    transport_socket:
-      name: envoy.transport_sockets.tls
-      typed_config:
-        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-        sni: en12u9gm69ytf.x.pipedream.net
-        common_tls_context:
-          validation_context:
-            match_subject_alt_names:
-            - exact: "*.x.pipedream.net"
-            trusted_ca:
-              filename: /etc/ssl/certs/ca-certificates.crt
   - name: upstream-service
     connect_timeout: 0.25s
     type: strict_dns
@@ -137,7 +117,7 @@ static_resources:
             address:
               socket_address:
                 address: upstream-service
-                port_value: 8082
+                port_value: 80
 
   - name: auth-service
     connect_timeout: 0.25s
@@ -150,5 +130,5 @@ static_resources:
         - endpoint:
             address:
               socket_address:
-                address: upstream-service
+                address: auth-service
                 port_value: 8082
