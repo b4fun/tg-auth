@@ -7,6 +7,10 @@ on:
         description: 'image tag to use'
         required: true
         default: 'latest'
+  push:
+    branches: ['main']
+  release:
+    types: [published]
 
 env:
   REGISTRY: ghcr.io
