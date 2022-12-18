@@ -16,6 +16,7 @@ type AuthzSettings struct {
 type SigninSettings struct {
 	RedirectCallbackURL string `env:"SIGNIN_REDIRECT_CALLBACK_URL"`
 	SigninURL           string `env:"SIGNIN_URL"`
+	AfterSigninURL      string `env:"SIGNIN_AFTER_SIGNIN_URL"`
 }
 
 type BotSettings struct {

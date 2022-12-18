@@ -26,6 +26,7 @@ type signinServer struct {
 	botTokenSHA256   []byte
 	admissioner      admission.Adminssioner
 	redirectToSignin http.Handler
+	redirectToTarget http.Handler
 	sessionManager   SessionManager
 }
 
@@ -47,6 +48,7 @@ func SigninCallback(
 		botTokenSHA256:   hasher.Sum(nil),
 		admissioner:      admissioner,
 		redirectToSignin: http.RedirectHandler(signinSettings.SigninURL, http.StatusFound),
+		redirectToTarget: http.RedirectHandler(signinSettings.AfterSigninURL, http.StatusSeeOther),
 		sessionManager:   sessionManager,
 	}
 	return rv, nil
@@ -109,6 +111,7 @@ func (ss *signinServer) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	if reviewResult.Allowed {
 		logger.Debug("session accepted")
 		ss.sessionManager.SetSession(ctx, wr, sess)
+		ss.redirectToTarget.ServeHTTP(wr, req)
 		return
 	}
 
