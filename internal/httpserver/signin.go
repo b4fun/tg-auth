@@ -110,7 +110,11 @@ func (ss *signinServer) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 
 	if reviewResult.Allowed {
 		logger.Debug("session accepted")
-		ss.sessionManager.SetSession(ctx, wr, sess)
+		if err := ss.sessionManager.SetSession(ctx, wr, sess); err != nil {
+			logger.Error("set session failed", zap.Error(err))
+			wr.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		ss.redirectToTarget.ServeHTTP(wr, req)
 		return
 	}
@@ -136,7 +140,7 @@ func SigninFrontend(
 `, botSettings.Name, signinSettings.RedirectCallbackURL)
 
 	rv := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(page))
+		fmt.Fprint(w, page)
 	})
 
 	return rv, nil

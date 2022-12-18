@@ -1,0 +1,31 @@
+name: test
+
+on:
+  pull_request: {}
+  push:
+    branches: ['main']
+
+permissions:
+  contents: read
+
+jobs:
+  golangci-lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v3
+    - uses: actions/checkout@v3
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v3
+      with:
+        version: v1.50
+
+  unit-test:
+    name: unit-test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-go@v3
+    - uses: actions/checkout@v3
+    - name: unit test
+      run: |
+        go test -v ./...
