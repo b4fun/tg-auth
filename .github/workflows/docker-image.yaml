@@ -6,7 +6,7 @@ on:
       image-tag:
         description: 'image tag to use'
         required: true
-        default: '*'
+        default: 'latest'
 
 env:
   REGISTRY: ghcr.io
