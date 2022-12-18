@@ -46,7 +46,7 @@ func SigninCallback(
 		logger:           logger.Named("signin-callback"),
 		botTokenSHA256:   hasher.Sum(nil),
 		admissioner:      admissioner,
-		redirectToSignin: redirectToLogin(signinSettings.SigninURL),
+		redirectToSignin: http.RedirectHandler(signinSettings.SigninURL, http.StatusFound),
 		sessionManager:   sessionManager,
 	}
 	return rv, nil

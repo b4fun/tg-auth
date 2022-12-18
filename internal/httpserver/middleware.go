@@ -8,12 +8,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func redirectToLogin(loginUrl string) http.Handler {
-	return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
-		http.Redirect(wr, req, loginUrl, http.StatusFound)
-	})
-}
-
 func RequireAuth(
 	logger *zap.Logger,
 	signinSettings settings.SigninSettings,
@@ -21,7 +15,7 @@ func RequireAuth(
 	sessionManager SessionManager,
 ) (MiddlewareFunc, error) {
 	rootLogger := logger.Named("require-auth")
-	redirectToLogin := redirectToLogin(signinSettings.SigninURL)
+	redirectToLogin := http.RedirectHandler(signinSettings.SigninURL, http.StatusFound)
 
 	rv := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
