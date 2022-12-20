@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	signinParameterId   = "id"
+	signinParameterID   = "id"
 	signinParameterHash = "hash"
 )
 
@@ -78,7 +78,7 @@ func (ss *signinServer) validateSignin(req *http.Request) (session.Session, erro
 		return sess, errors.New("HMAC SHA256 hash mismatch")
 	}
 
-	userID := qs.Get(signinParameterId)
+	userID := qs.Get(signinParameterID)
 	if userID == "" {
 		return sess, errors.New("no user id found")
 	}

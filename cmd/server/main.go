@@ -65,6 +65,7 @@ func main() {
 		return
 	}
 
+	// #nosec: G114
 	if err := http.ListenAndServe(":8082", httpServer); err != nil {
 		logger.Fatal("http server serve", zap.Error(err))
 		return
