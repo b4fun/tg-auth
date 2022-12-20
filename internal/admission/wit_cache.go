@@ -38,7 +38,7 @@ func (wc *withCache) Review(
 ) (ReviewResult, error) {
 	cacheKey := sess.UserID
 	cached := wc.cache.Get(cacheKey)
-	if !cached.IsExpired() {
+	if cached != nil && !cached.IsExpired() {
 		return cached.Value(), nil
 	}
 
