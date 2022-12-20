@@ -12,6 +12,8 @@ type (
 	BotSettings    = settings.BotSettings
 	AuthnSettings  = settings.AuthnSettings
 	AuthzSettings  = settings.AuthzSettings
+
+	Admissioner = admission.Admissioner
 )
 
 var (
@@ -20,4 +22,6 @@ var (
 	NewDefaultHTTPServer = httpserver.Default
 
 	NewTelegramChannelAdmissioner = admission.NewTelegramChannelAdmission
+	AdmissionerWithCache          = admission.WithCache
+	AdmissionerWithSingleFlight   = admission.WithSingleFlight
 )

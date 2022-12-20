@@ -10,7 +10,7 @@ type ReviewResult struct {
 	Allowed bool
 }
 
-type Adminssioner interface {
+type Admissioner interface {
 	Review(
 		ctx context.Context,
 		sess session.Session,

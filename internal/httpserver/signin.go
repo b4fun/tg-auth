@@ -17,14 +17,14 @@ import (
 )
 
 const (
-	signinParameterId   = "id"
+	signinParameterID   = "id"
 	signinParameterHash = "hash"
 )
 
 type signinServer struct {
 	logger           *zap.Logger
 	botTokenSHA256   []byte
-	admissioner      admission.Adminssioner
+	admissioner      admission.Admissioner
 	redirectToSignin http.Handler
 	redirectToTarget http.Handler
 	sessionManager   SessionManager
@@ -34,7 +34,7 @@ func SigninCallback(
 	logger *zap.Logger,
 	signinSettings settings.SigninSettings,
 	botSettings settings.BotSettings,
-	admissioner admission.Adminssioner,
+	admissioner admission.Admissioner,
 	sessionManager SessionManager,
 ) (*signinServer, error) {
 	hasher := sha256.New()
@@ -78,7 +78,7 @@ func (ss *signinServer) validateSignin(req *http.Request) (session.Session, erro
 		return sess, errors.New("HMAC SHA256 hash mismatch")
 	}
 
-	userID := qs.Get(signinParameterId)
+	userID := qs.Get(signinParameterID)
 	if userID == "" {
 		return sess, errors.New("no user id found")
 	}

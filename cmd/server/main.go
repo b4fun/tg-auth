@@ -31,12 +31,25 @@ func main() {
 		return
 	}
 
-	admissioner, err := tgauth.NewTelegramChannelAdmissioner(
-		logger, settings.Bot, settings.Authz,
-	)
-	if err != nil {
-		logger.Fatal("create admissioner", zap.Error(err))
-		return
+	var admissioner tgauth.Admissioner
+	{
+		admissioner, err = tgauth.NewTelegramChannelAdmissioner(
+			logger, settings.Bot, settings.Authz,
+		)
+		if err != nil {
+			logger.Fatal("create admissioner", zap.Error(err))
+			return
+		}
+		admissioner, err = tgauth.AdmissionerWithCache(admissioner, settings.Authn.SessionTTL)
+		if err != nil {
+			logger.Fatal("wrap admissioner with cache", zap.Error(err))
+			return
+		}
+		admissioner, err = tgauth.AdmissionerWithSingleFlight(admissioner)
+		if err != nil {
+			logger.Fatal("wrap admissioner with single flight", zap.Error(err))
+			return
+		}
 	}
 
 	httpServer, err := tgauth.NewDefaultHTTPServer(
@@ -52,6 +65,7 @@ func main() {
 		return
 	}
 
+	// #nosec: G114
 	if err := http.ListenAndServe(":8082", httpServer); err != nil {
 		logger.Fatal("http server serve", zap.Error(err))
 		return

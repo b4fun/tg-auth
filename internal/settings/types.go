@@ -10,7 +10,8 @@ type AuthnSettings struct {
 }
 
 type AuthzSettings struct {
-	ChannelIDs []string `env:"AUTHZ_CHANNEL_IDS" envSeparator:","`
+	ChannelIDs []string      `env:"AUTHZ_CHANNEL_IDS" envSeparator:","`
+	CacheTTL   time.Duration `env:"AUTHZ_CACHE" envDefault:"5m"`
 }
 
 type SigninSettings struct {

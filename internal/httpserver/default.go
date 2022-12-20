@@ -11,7 +11,7 @@ import (
 func Default(
 	logger *zap.Logger,
 	settings settings.Settings,
-	admissioner admission.Adminssioner,
+	admissioner admission.Admissioner,
 	defaultHandler http.Handler,
 ) (http.Handler, error) {
 	sessionManager, err := newCookieSessionManager(settings.Authn)
