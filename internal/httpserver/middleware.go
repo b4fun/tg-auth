@@ -11,7 +11,7 @@ import (
 func RequireAuth(
 	logger *zap.Logger,
 	signinSettings settings.SigninSettings,
-	admissioner admission.Adminssioner,
+	admissioner admission.Admissioner,
 	sessionManager SessionManager,
 ) (MiddlewareFunc, error) {
 	rootLogger := logger.Named("require-auth")

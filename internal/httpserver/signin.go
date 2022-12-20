@@ -24,7 +24,7 @@ const (
 type signinServer struct {
 	logger           *zap.Logger
 	botTokenSHA256   []byte
-	admissioner      admission.Adminssioner
+	admissioner      admission.Admissioner
 	redirectToSignin http.Handler
 	redirectToTarget http.Handler
 	sessionManager   SessionManager
@@ -34,7 +34,7 @@ func SigninCallback(
 	logger *zap.Logger,
 	signinSettings settings.SigninSettings,
 	botSettings settings.BotSettings,
-	admissioner admission.Adminssioner,
+	admissioner admission.Admissioner,
 	sessionManager SessionManager,
 ) (*signinServer, error) {
 	hasher := sha256.New()

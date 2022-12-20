@@ -18,13 +18,13 @@ type telegramAdmissioner struct {
 	channelIDsToCheck []string
 }
 
-var _ Adminssioner = (*telegramAdmissioner)(nil)
+var _ Admissioner = (*telegramAdmissioner)(nil)
 
 func NewTelegramChannelAdmission(
 	logger *zap.Logger,
 	botSettings settings.BotSettings,
 	authzSettings settings.AuthzSettings,
-) (Adminssioner, error) {
+) (Admissioner, error) {
 	bot, err := tgbotapi.NewBotAPI(botSettings.Token)
 	if err != nil {
 		return nil, err
