@@ -3,8 +3,8 @@ package testhelper
 import (
 	"context"
 
-	"github.com/b4fun/tg-auth/internal/session"
 	"github.com/b4fun/tg-auth/internal/admission"
+	"github.com/b4fun/tg-auth/internal/session"
 )
 
 type Admissioner struct {
