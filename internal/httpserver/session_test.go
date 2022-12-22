@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -85,5 +86,22 @@ func Test_cookieSessionManager(t *testing.T) {
 	t.Run("blank", func(t *testing.T) {
 		_, err := manager.GetSession(context.Background(), &http.Request{})
 		assert.Error(t, err)
+	})
+
+	t.Run("SetSession", func(t *testing.T) {
+		sess := session.Default()
+		sess.UserID = "test-user-id"
+
+		rw := httptest.NewRecorder()
+		err := manager.SetSession(
+			context.Background(),
+			rw,
+			sess,
+		)
+		assert.NoError(t, err)
+
+		v := rw.Header().Get("Set-Cookie")
+		assert.NotEmpty(t, v)
+		assert.Contains(t, v, "auth=")
 	})
 }

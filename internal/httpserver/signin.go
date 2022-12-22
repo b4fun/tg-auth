@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 
@@ -54,14 +55,14 @@ func SigninCallback(
 	return rv, nil
 }
 
-func (ss *signinServer) validateSignin(req *http.Request) (session.Session, error) {
-	sess := session.Default()
-
-	qs := req.URL.Query()
-	hash := qs.Get(signinParameterHash)
+func sha256HMACSignature(
+	hashKey []byte,
+	qs url.Values,
+	isParameterKey func(s string) bool,
+) (string, error) {
 	var ps []string
 	for key := range qs {
-		if key == signinParameterHash {
+		if !isParameterKey(key) {
 			continue
 		}
 		ps = append(ps, fmt.Sprintf("%s=%s", key, qs.Get(key)))
@@ -69,11 +70,26 @@ func (ss *signinServer) validateSignin(req *http.Request) (session.Session, erro
 	sort.Strings(ps)
 	checkStr := strings.Join(ps, "\n")
 
-	mac := hmac.New(sha256.New, ss.botTokenSHA256)
+	mac := hmac.New(sha256.New, hashKey)
 	if _, err := mac.Write([]byte(checkStr)); err != nil {
-		return sess, fmt.Errorf("calculate HMAC SHA256: %w", err)
+		return "", fmt.Errorf("calculate HMAC SHA256: %w", err)
 	}
-	expectedHash := hex.EncodeToString(mac.Sum(nil))
+
+	return hex.EncodeToString(mac.Sum(nil)), nil
+}
+
+func (ss *signinServer) validateSignin(req *http.Request) (session.Session, error) {
+	sess := session.Default()
+
+	qs := req.URL.Query()
+	expectedHash, err := sha256HMACSignature(
+		ss.botTokenSHA256, qs,
+		func(s string) bool { return s != signinParameterHash },
+	)
+	if err != nil {
+		return sess, err
+	}
+	hash := qs.Get(signinParameterHash)
 	if !hmac.Equal([]byte(expectedHash), []byte(hash)) {
 		return sess, errors.New("HMAC SHA256 hash mismatch")
 	}
