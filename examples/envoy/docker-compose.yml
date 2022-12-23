@@ -1,0 +1,40 @@
+services:
+  envoy:
+    build:
+      context: .
+      dockerfile: envoy.Dockerfile
+    volumes:
+      - ./envoy.yaml:/etc/envoy.yaml
+    networks:
+      - mesh
+    ports:
+      - 8080:8080
+      - 8081:8081
+
+  upstream-service:
+    image: httpd:2.4.54
+    networks:
+      - mesh
+
+  auth-service:
+    image: ghcr.io/b4fun/tg-auth/server:main
+    environment:
+    - BOT_NAME=my-bot
+    - BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+    - SIGNIN_URL=http://example.com/signin
+    - SIGNIN_AFTER_SIGNIN_URL=http://example.com/
+    - AUTHZ_CHANNEL_IDS=-123456789
+    - AUTHZ_CACHE=5m
+    - AUTHN_COOKIE_SIGNING_KEY=<generate-one-aes-key>
+    - AUTHN_COOKIE_NAME=tguth_session
+    - AUTHN_COOKIE_DOMAIN=example.com
+    - AUTHN_SESSION_TTL=1h
+    volumes:
+      - ..:/workspace
+    networks:
+      - mesh
+    ports:
+      - 8082:8082
+
+networks:
+  mesh: {}

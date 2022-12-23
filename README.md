@@ -20,7 +20,7 @@ Authentication/authorization middleware with Telegram.
 tg-auth runs with following environment variables:
 
 | Variable Name | Description | Sample |
-|:-----------:|:---|:---|
+|-----------:|:---|:---|
 | `BOT_NAME` | Telegram bot name | |
 | `BOT_TOKEN` | Telegram bot token | |
 | `SIGNIN_URL` | URL endpoint of the signin protoal | `https://example.com/signin` |
@@ -34,6 +34,8 @@ tg-auth runs with following environment variables:
 | `AUTHN_SESSION_TTL` | TTL of the cookie. Defaults to 1 hour | `1h` |
 
 ## Examples
+
+- Using with envoy: [examples/envoy](./examples/envoy/)
 
 ## LICENSE
 
